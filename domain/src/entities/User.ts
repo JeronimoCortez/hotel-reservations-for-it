@@ -8,7 +8,7 @@ export class User implements IUser {
         public name: string,
         public email: string,
         public password: string,
-        public rol: Roles,
+        public role: Roles,
     ) { }
 
     changePassword(newPassword: string) {
@@ -16,6 +16,6 @@ export class User implements IUser {
     }
 
     idAdmin(): boolean {
-        return this.rol === Roles.ADMIN;
+        return this.role === Roles.ADMIN;
     }
 }

@@ -19,11 +19,11 @@ export class Reservation implements IReservation {
             throw new Error("Cannot confirm a cancelled reservation.");
         }
         this.status = Status.CONFIRMED;
-        this.room.markUnavailable;
+        this.room.markUnavailable();
     }
 
     cancel() {
         this.status = Status.CANCELLED;
-        this.room.markAvailable;
+        this.room.markAvailable();
     }
 }

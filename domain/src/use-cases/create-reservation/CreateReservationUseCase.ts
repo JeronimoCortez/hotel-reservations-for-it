@@ -9,7 +9,7 @@ import { CreateReservationResult } from "./CreateReservationResult";
 import { v4 as uuid } from "uuid";
 
 
-export class CreateReservatioUseCase {
+export class CreateReservationUseCase {
     constructor(
         private userRepo: IUserRepository,
         private roomRepo: IRoomRepository,
