@@ -2,6 +2,7 @@ import { Reservation } from "../../../../domain/src/entities/Reservation";
 import { Room } from "../../../../domain/src/entities/Room";
 import { User } from "../../../../domain/src/entities/User";
 import { Roles } from "../../../../domain/src/types/Roles";
+import { RoomType } from "../../../../domain/src/types/RoomType";
 import { Status } from "../../../../domain/src/types/Status";
 import { IReservationRepository } from "../../../../domain/src/use-cases/ports/IReservationRepository";
 import ReservationModel from "../models/ReservationModel";
@@ -128,4 +129,77 @@ export class MongoReservationRepository implements IReservationRepository {
     async delete(id: string): Promise<void> {
         await ReservationModel.deleteOne({ _id: id })
     }
+    async findByUser(userId: string): Promise<Reservation[]> {
+        const reservations = await ReservationModel.find({ userId }).lean();
+        const results: Reservation[] = [];
+
+        for (const r of reservations) {
+            const userDoc = await UserModel.findById(r.userId).lean();
+            const roomDoc = await RoomModel.findById(r.roomId).lean();
+
+            if (!userDoc || !roomDoc) continue;
+
+            results.push(
+                new Reservation(
+                    String(r._id),
+                    new User(
+                        String(userDoc._id),
+                        userDoc.name ?? "",
+                        userDoc.email ?? "",
+                        userDoc.password ?? "",
+                        userDoc.role as Roles
+                    ),
+                    new Room(
+                        String(roomDoc._id),
+                        roomDoc.number ?? 0,
+                        roomDoc.type as RoomType,
+                        roomDoc.price ?? 0,
+                        roomDoc.available ?? false
+                    ),
+                    new Date(r.startDate!),
+                    new Date(r.endDate!),
+                    r.status as Status
+                )
+            );
+        }
+
+        return results;
+    }
+    async findAll(): Promise<Reservation[]> {
+        const reservations = await ReservationModel.find().lean();
+        const results: Reservation[] = [];
+
+        for (const r of reservations) {
+            const userDoc = await UserModel.findById(r.userId).lean();
+            const roomDoc = await RoomModel.findById(r.roomId).lean();
+
+            if (!userDoc || !roomDoc) continue; // seguridad ante datos incompletos
+
+            results.push(
+                new Reservation(
+                    String(r._id),
+                    new User(
+                        String(userDoc._id),
+                        userDoc.name ?? "",
+                        userDoc.email ?? "",
+                        userDoc.password ?? "",
+                        userDoc.role as Roles
+                    ),
+                    new Room(
+                        String(roomDoc._id),
+                        roomDoc.number ?? 0,
+                        roomDoc.type as RoomType,
+                        roomDoc.price ?? 0,
+                        roomDoc.available ?? false
+                    ),
+                    new Date(r.startDate!),
+                    new Date(r.endDate!),
+                    r.status as Status
+                )
+            );
+        }
+
+        return results;
+    }
+
 }

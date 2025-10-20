@@ -17,7 +17,7 @@ export function mapToRoomType(type?: string | null): RoomType {
     }
 }
 
-export class MongoRoomRepo implements IRoomRepository {
+export class MongoRoomRepository implements IRoomRepository {
     async findById(id: string): Promise<Room | null> {
         const room = await RoomModel.findById(id).lean();
         if (!room) return null;
@@ -40,5 +40,8 @@ export class MongoRoomRepo implements IRoomRepository {
             { _id: room.id, number: room.number, type: room.type, price: room.price, available: room.available },
             { upsert: true }
         )
+    }
+    async delete(id: string): Promise<void> {
+        await RoomModel.deleteOne({ _id: id });
     }
 }
