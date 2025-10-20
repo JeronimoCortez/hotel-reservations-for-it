@@ -1,0 +1,459 @@
+{
+	"info": {
+		"_postman_id": "1cf58819-4f66-4f20-bfe9-f0673dc0cd7d",
+		"name": "ProyectoFinalForIt",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "34903075"
+	},
+	"item": [
+		{
+			"name": "GetRooms",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:3000/rooms",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"rooms"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Register",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"name\": \"User\",\r\n  \"email\": \"user@gmail.com\",\r\n  \"password\": \"password\"\r\n}\r\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/users/register",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"users",
+						"register"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GetUsers",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"name\": \"Admin\",\r\n  \"email\": \"admin@gmail.com\",\r\n  \"password\": \"password\"\r\n}\r\n"
+				},
+				"url": {
+					"raw": "http://localhost:3000/users",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"users"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Login",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"email\": \"user@gmail.com\",\r\n  \"password\": \"password\"\r\n}\r\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/users/login",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"users",
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GetUser",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"name\": \"Admin\",\r\n  \"email\": \"admin@gmail.com\",\r\n  \"password\": \"password\"\r\n}\r\n"
+				},
+				"url": {
+					"raw": "http://localhost:3000/users/9b5c9dd2-5cba-46b6-871f-8c851a5186c6",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"users",
+						"9b5c9dd2-5cba-46b6-871f-8c851a5186c6"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "CreateRoom",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI5YjVjOWRkMi01Y2JhLTQ2YjYtODcxZi04Yzg1MWE1MTg2YzYiLCJyb2xlIjoiQURNSU4iLCJpYXQiOjE3NjA5OTcyMDMsImV4cCI6MTc2MTAwMDgwM30.0AZd2J58u_ZEYmE41vPlYUQ4Jq3BJKNcJeJyJmf8LI0",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI5YjVjOWRkMi01Y2JhLTQ2YjYtODcxZi04Yzg1MWE1MTg2YzYiLCJyb2xlIjoiQURNSU4iLCJpYXQiOjE3NjA5OTY4NDgsImV4cCI6MTc2MTAwMDQ0OH0.18CMzLFBw6GzYSOp23Oh82TUlazllbJe6LWS4AkqPyg",
+						"type": "text",
+						"disabled": true
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"number\": 2,\r\n    \"type\": \"DOUBLE\",\r\n    \"price\": 20000\r\n\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/rooms/",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"rooms",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "UpdateRoom",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI5YjVjOWRkMi01Y2JhLTQ2YjYtODcxZi04Yzg1MWE1MTg2YzYiLCJyb2xlIjoiQURNSU4iLCJpYXQiOjE3NjA5OTcyMDMsImV4cCI6MTc2MTAwMDgwM30.0AZd2J58u_ZEYmE41vPlYUQ4Jq3BJKNcJeJyJmf8LI0",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI5YjVjOWRkMi01Y2JhLTQ2YjYtODcxZi04Yzg1MWE1MTg2YzYiLCJyb2xlIjoiQURNSU4iLCJpYXQiOjE3NjA5OTY4NDgsImV4cCI6MTc2MTAwMDQ0OH0.18CMzLFBw6GzYSOp23Oh82TUlazllbJe6LWS4AkqPyg",
+						"type": "text",
+						"disabled": true
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"number\": 2,\r\n    \"type\": \"DOUBLE\",\r\n    \"price\": 30000\r\n\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/rooms/1f97d5a6-3b7b-4528-969d-e1c6b4aecfaa",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"rooms",
+						"1f97d5a6-3b7b-4528-969d-e1c6b4aecfaa"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "DeleteRoom",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI5YjVjOWRkMi01Y2JhLTQ2YjYtODcxZi04Yzg1MWE1MTg2YzYiLCJyb2xlIjoiQURNSU4iLCJpYXQiOjE3NjA5OTcyMDMsImV4cCI6MTc2MTAwMDgwM30.0AZd2J58u_ZEYmE41vPlYUQ4Jq3BJKNcJeJyJmf8LI0",
+							"type": "string"
+						}
+					]
+				},
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI5YjVjOWRkMi01Y2JhLTQ2YjYtODcxZi04Yzg1MWE1MTg2YzYiLCJyb2xlIjoiQURNSU4iLCJpYXQiOjE3NjA5OTY4NDgsImV4cCI6MTc2MTAwMDQ0OH0.18CMzLFBw6GzYSOp23Oh82TUlazllbJe6LWS4AkqPyg",
+						"type": "text",
+						"disabled": true
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"number\": 2,\r\n    \"type\": \"DOUBLE\",\r\n    \"price\": 30000\r\n\r\n}"
+				},
+				"url": {
+					"raw": "http://localhost:3000/rooms/1f97d5a6-3b7b-4528-969d-e1c6b4aecfaa",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"rooms",
+						"1f97d5a6-3b7b-4528-969d-e1c6b4aecfaa"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GetRoomById",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:3000/rooms/38c78563-485a-4bf2-bd63-fb19151b7625",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"rooms",
+						"38c78563-485a-4bf2-bd63-fb19151b7625"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GetReservations",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI5YjVjOWRkMi01Y2JhLTQ2YjYtODcxZi04Yzg1MWE1MTg2YzYiLCJyb2xlIjoiQURNSU4iLCJpYXQiOjE3NjA5OTcyMDMsImV4cCI6MTc2MTAwMDgwM30.0AZd2J58u_ZEYmE41vPlYUQ4Jq3BJKNcJeJyJmf8LI0",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:3000/reservations",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"reservations"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "CreateReservation",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIyYjJkZTEyNy1mMzM1LTRiNWMtOWE1Yy0wMDU2Y2E3MjI4NGUiLCJyb2xlIjoiVVNFUiIsImlhdCI6MTc2MDk5NzUyNCwiZXhwIjoxNzYxMDAxMTI0fQ.DsgOpKrfxUMcxM-JNXrU5At4Ftr8hPXozG7kNL-A0w4",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"userId\": \"2b2de127-f335-4b5c-9a5c-0056ca72284e\",\r\n    \"roomId\": \"38c78563-485a-4bf2-bd63-fb19151b7625\",\r\n    \"startDate\": \"2025-10-20T00:00:00.000Z\",\r\n    \"endDate\": \"2025-10-25T00:00:00.000Z\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/reservations/",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"reservations",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "CancelReservation",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIyYjJkZTEyNy1mMzM1LTRiNWMtOWE1Yy0wMDU2Y2E3MjI4NGUiLCJyb2xlIjoiVVNFUiIsImlhdCI6MTc2MDk5NzUyNCwiZXhwIjoxNzYxMDAxMTI0fQ.DsgOpKrfxUMcxM-JNXrU5At4Ftr8hPXozG7kNL-A0w4",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"reservationId\": \"49234cae-285d-49d0-a7d2-f11ca0078568\",\r\n    \"requesterUserId\": \"2b2de127-f335-4b5c-9a5c-0056ca72284e\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/reservations/cancel/49234cae-285d-49d0-a7d2-f11ca0078568",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"reservations",
+						"cancel",
+						"49234cae-285d-49d0-a7d2-f11ca0078568"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "ConfirmReservation",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIyYjJkZTEyNy1mMzM1LTRiNWMtOWE1Yy0wMDU2Y2E3MjI4NGUiLCJyb2xlIjoiVVNFUiIsImlhdCI6MTc2MDk5NzUyNCwiZXhwIjoxNzYxMDAxMTI0fQ.DsgOpKrfxUMcxM-JNXrU5At4Ftr8hPXozG7kNL-A0w4",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"reservationId\": \"15b34fc9-ad86-449a-bcad-54f1720b7ef7\",\r\n    \"requesterUserId\": \"2b2de127-f335-4b5c-9a5c-0056ca72284e\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/reservations/confirm/15b34fc9-ad86-449a-bcad-54f1720b7ef7",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"reservations",
+						"confirm",
+						"15b34fc9-ad86-449a-bcad-54f1720b7ef7"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
