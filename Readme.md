@@ -143,6 +143,7 @@ Reservas
 - Toda la lógica de negocio reside en domain/; los controladores solo exponen HTTP.
 - Roles definidos en domain/src/types/Roles.ts (USER, ADMIN).
 - JWT asegura acceso a rutas protegidas.
+- Como desafio personal decidi desarrollar el proyecto en ingles, pero dejar el readme en español.
 
 ## Autor
 
