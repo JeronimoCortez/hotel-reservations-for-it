@@ -4,9 +4,11 @@ import express from "express";
 import userRouter from "./routes/UserRoutes";
 import roomRouter from "./routes/RoomRoutes";
 import reservationRouter from "./routes/ReservationRoutes";
+import cors from "cors";
 
 dotenv.config();
 const app = express();
+app.use(cors());
 app.use(express.json());
 const PORT = process.env.PORT || 3000
 
