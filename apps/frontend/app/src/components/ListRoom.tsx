@@ -13,10 +13,12 @@ const ListRoom = () => {
   if (loading) return <div>Loading...</div>;
   if (error) return <div className="text-red-600">{error}</div>;
   return (
-    <div className="flex gap-4 md:min-h-[80vh] my-2 justify-center items-center flex flex-col md:flex-row md:flex-wrap">
-      {rooms.map((r) => (
-        <CardRoom room={r} />
-      ))}
+    <div className="my-4 flex items-center justify-center flex-wrap gap-2">
+      {rooms.length > 0 ? (
+        rooms.map((r) => <CardRoom key={r.id} room={r} />)
+      ) : (
+        <p className="text-center mt-2 font-bold">No rooms available</p>
+      )}
     </div>
   );
 };

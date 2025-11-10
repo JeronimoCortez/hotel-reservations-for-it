@@ -2,6 +2,7 @@ import { create } from "zustand";
 import type { Reservation } from "../features/reservations/types/Reservation.interface";
 import type { ICreateReservation } from "../features/reservations/types/ICreateReservation";
 import { reservationService } from "../features/reservations/services/ReservationService";
+import Swal from "sweetalert2";
 
 type ReservationState = {
   reservations: Reservation[];
@@ -11,7 +12,7 @@ type ReservationState = {
 
   setToken: (token: string | null) => void;
   fetchReservations: (userId: string) => Promise<void>;
-  refreshReservations: () => Promise<void>; // alias to re-fetch with same userId
+  refreshReservations: () => Promise<void>;
   createReservation: (data: ICreateReservation) => Promise<Reservation | void>;
   confirmReservation: (id: string) => Promise<Reservation | void>;
   cancelReservation: (reservationId: string, requesterUserId: string) => Promise<void>;
@@ -36,14 +37,34 @@ export const useReservationStore = create<ReservationState>((set, get) => ({
     }
   },
 
+  fetchAllReservations: async () => {
+    set({ loading: true, error: null });
+    try {
+      const token = get().token ?? undefined;
+      const res = await reservationService.listAll(token!);
+      set({ reservations: res, loading: false });
+    } catch (err: any) {
+      set({ error: err?.message ?? "Unknown error", loading: false });
+    }
+  },
+
   refreshReservations: async () => {
-    return get().fetchReservations((get().reservations[0]?.userId as string) || "");
+    return get().fetchReservations((get().reservations[0]?.user.id as string) || "");
   },
 
   createReservation: async (data) => {
     set({ loading: true, error: null });
     try {
-      const token = get().token ?? undefined;
+      const token = localStorage.getItem("token")
+      if (!token) {
+        Swal.fire({
+          icon: "error",
+          title: "Unauthorized",
+          text: "You must be logged in as admin to confirm a reservation.",
+        });
+        set({ loading: false });
+        return;
+      }
       const newR = await reservationService.create(data, token);
       set((state) => ({ reservations: [newR, ...state.reservations], loading: false }));
       return newR;
@@ -55,9 +76,13 @@ export const useReservationStore = create<ReservationState>((set, get) => ({
   confirmReservation: async (id) => {
     set({ loading: true, error: null });
     try {
-      const token = get().token;
+      const token = localStorage.getItem("token");
       if (!token) {
-        set({ error: "Admin token required to confirm reservation." });
+        Swal.fire({
+          icon: "error",
+          title: "Unauthorized",
+          text: "You must be logged in as admin to confirm a reservation.",
+        });
         set({ loading: false });
         return;
       }
@@ -75,7 +100,16 @@ export const useReservationStore = create<ReservationState>((set, get) => ({
   cancelReservation: async (reservationId, requesterUserId) => {
     set({ loading: true, error: null });
     try {
-      const token = get().token ?? undefined;
+      const token = localStorage.getItem("token");
+      if (!token) {
+        Swal.fire({
+          icon: "error",
+          title: "Unauthorized",
+          text: "You must be logged in as admin to confirm a reservation.",
+        });
+        set({ loading: false });
+        return;
+      }
       const res = await reservationService.cancel(reservationId, requesterUserId, token);
 
       if (res) {

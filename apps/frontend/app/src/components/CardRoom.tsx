@@ -1,6 +1,7 @@
 import type { FC } from "react";
 import type { Room } from "../features/rooms/types/Room.interface";
 import { useReservationStore } from "../store/ReservationStore";
+import Swal from "sweetalert2";
 
 const roomImages: Record<string, string> = {
   single: "/SingleRoom.png",
@@ -16,38 +17,72 @@ const CardRoom: FC<IPropsCardRoom> = ({ room }) => {
   const { createReservation } = useReservationStore();
 
   const handleReserve = async () => {
-    const checkInInput = document.getElementById(
-      "check-in"
-    ) as HTMLInputElement;
-    const checkOutInput = document.getElementById(
-      "check-out"
-    ) as HTMLInputElement;
+    const checkInInput = document.getElementById("check-in") as HTMLInputElement;
+    const checkOutInput = document.getElementById("check-out") as HTMLInputElement;
 
     if (!checkInInput?.value || !checkOutInput?.value) {
-      alert("Please select check-in and check-out dates");
+      await Swal.fire({
+        icon: "warning",
+        title: "Missing dates",
+        text: "Please select check-in and check-out dates.",
+        confirmButtonColor: "#134074",
+      });
       return;
     }
 
     try {
+      const userData = localStorage.getItem("user-storage");
+      if (!userData) {
+        await Swal.fire({
+          icon: "error",
+          title: "User not found",
+          text: "Please log in before making a reservation.",
+          confirmButtonColor: "#134074",
+        });
+        return;
+      }
+
+      const { state } = JSON.parse(userData);
+      const userId = state?.user?.id;
+
+      if (!userId) {
+        await Swal.fire({
+          icon: "error",
+          title: "Invalid user data",
+          text: "Could not retrieve user information.",
+          confirmButtonColor: "#134074",
+        });
+        return;
+      }
+
       await createReservation({
-        userId: "user-id-aqui", // reemplazar con el id real del usuario (puede venir de auth store)
+        userId,
         roomId: room.id,
         startDate: checkInInput.value,
         endDate: checkOutInput.value,
       });
-      alert("Reservation created!");
+
+      await Swal.fire({
+        icon: "success",
+        title: "Reservation successful",
+        text: "Your reservation has been created successfully!",
+        confirmButtonColor: "#134074",
+      });
     } catch (error: any) {
-      alert(error.message ?? "Failed to create reservation");
+      await Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: error?.message ?? "Failed to create reservation.",
+        confirmButtonColor: "#134074",
+      });
     }
   };
 
   return (
-    <div className="w-full max-w-sm bg-[#134074] p-5 rounded-lg shadow-md flex flex-col items-stretch gap-3 text-white ">
+    <div className="w-full max-w-sm bg-[#134074] p-5 rounded-lg shadow-md flex flex-col items-stretch gap-3 text-white">
       <img
         src={roomImages[room.type] || "/default-room.png"}
-        alt={`${
-          room.type.charAt(0).toUpperCase() + room.type.slice(1)
-        } room image`}
+        alt={`${room.type.charAt(0).toUpperCase() + room.type.slice(1)} room image`}
         className="w-full h-40 object-cover rounded-md shadow-sm"
       />
 
@@ -70,7 +105,7 @@ const CardRoom: FC<IPropsCardRoom> = ({ room }) => {
             aria-label="Check-in date"
             type="date"
             id="check-in"
-            className="rounded-md px-3 py-2 border border-[#fff] text-white"
+            className="rounded-md px-3 py-2 border border-[#fff] text-white bg-transparent"
           />
         </label>
 
@@ -81,7 +116,7 @@ const CardRoom: FC<IPropsCardRoom> = ({ room }) => {
             aria-label="Check-out date"
             type="date"
             id="check-out"
-            className="rounded-md px-3 py-2 border border-[#fff] text-white"
+            className="rounded-md px-3 py-2 border border-[#fff] text-white bg-transparent"
           />
         </label>
       </div>

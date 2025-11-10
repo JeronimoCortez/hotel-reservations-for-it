@@ -1,10 +1,12 @@
-import { Plus, Trash } from "lucide-react";
-import { useEffect } from "react";
+import { Plus } from "lucide-react";
+import { useEffect, useState } from "react";
 import { useUserStore } from "../store/UserStore";
+import CreateUser from "./CreateUserForm";
 
 const TableUser = () => {
   const { users, loading, error, fetchUsers, setToken } = useUserStore();
-  
+  const [openModal, setOpenModal] = useState<boolean>(false);
+
   useEffect(() => {
     const t = localStorage.getItem("token");
     if (t) setToken(t);
@@ -14,11 +16,20 @@ const TableUser = () => {
   if (loading) return <div>Loading...</div>;
   if (error) return <div className="text-red-600">{error}</div>;
 
+  const handleOpenModal = () => {
+    if (openModal) {
+      setOpenModal(false);
+    } else {
+      setOpenModal(true);
+    }
+  };
+
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col max-h-[70vh] overflow-y-auto">
       <div className="flex items-center gap-5 mx-auto">
         <h2 className="text-center text-xl font-bold">Users</h2>
         <button
+          onClick={handleOpenModal}
           className="all:unset border rounded-full p-1 mt-1 text-[#134074] cursor-pointer"
           aria-label="Create user"
         >
@@ -35,22 +46,9 @@ const TableUser = () => {
           <p className="min-w-[200px]">Email: {u.email}</p>
           <p className="min-w-[120px]">Role: {u.role}</p>
 
-          <div className="flex items-center gap-2">
-            <button
-              className="p-2 rounded bg-white/10 hover:bg-white/20"
-              aria-label={`Edit user ${u.id}`}
-            >
-              Edit
-            </button>
-            <button
-              className="p-2 rounded bg-white/10 hover:bg-white/20"
-              aria-label={`Delete user ${u.id}`}
-            >
-              <Trash />
-            </button>
-          </div>
         </div>
       ))}
+      {openModal && <CreateUser onClose={handleOpenModal}/>}
     </div>
   );
 };

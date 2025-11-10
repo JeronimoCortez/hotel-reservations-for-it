@@ -1,15 +1,15 @@
-import React, { useState } from "react";
+import React from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
+import Swal from "sweetalert2";
 import { authService } from "../features/auth/services/AuthService";
-import { useNavigate } from "react-router-dom";
-import { useUserStore } from "../store/UserStore";
+import { CircleX } from "lucide-react";
 
-const Register: React.FC = () => {
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
-  const navigate = useNavigate();
-  const { setToken, setUser } = useUserStore();
+type ICreateUserProps = {
+    onClose: VoidFunction;
+}
+
+const CreateUser: React.FC<ICreateUserProps> = ({onClose}) => {
 
   const formik = useFormik({
     initialValues: {
@@ -22,35 +22,34 @@ const Register: React.FC = () => {
       email: Yup.string().email("Invalid email address").required("Email is required"),
       password: Yup.string().required("Password is required"),
     }),
-    onSubmit: async (values) => {
-      setError(null);
-      setSuccess(null);
+    onSubmit: async (values, { resetForm }) => {
       try {
         const res = await authService.register(values.name, values.email, values.password);
-        setSuccess(res?.message || "Account created successfully!");
-        const { token, user } = await authService.login(values.email, values.password);
-        localStorage.setItem("token", token);
-        setToken(token);
-        setUser(user);
-        navigate("/");
+        await Swal.fire({
+          icon: "success",
+          title: "User created",
+          text: res?.message || "User created successfully!",
+          showConfirmButton: false,
+          timer: 1500,
+        });
+        resetForm();
+        onClose();
       } catch (err: any) {
-        if (err?.response?.data?.message) {
-          setError(err.response.data.message);
-        } else {
-          setError("Registration failed. Please try again.");
-        }
+        await Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: err?.response?.data?.message || err?.message || "User creation failed. Please try again.",
+        });
       }
     },
   });
 
   return (
-    <div className="flex flex-col justify-center items-center p-4 h-[80vh]">
-      <form
-        onSubmit={formik.handleSubmit}
-        className="flex justify-center flex-col min-w-[300px] max-w-[400px] border p-4 rounded"
-      >
+    <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-[999]">
+      <form onSubmit={formik.handleSubmit} className="w-[25vw] mx-auto bg-white p-4 rounded shadow flex flex-col gap-4">
+        <CircleX onClick={onClose} className="cursor-pointer" />
         <h4 className="text-center mb-2 text-lg font-semibold text-[#134074]">
-          Register Your Account
+          Create New User
         </h4>
 
         <label htmlFor="name">Name</label>
@@ -95,25 +94,15 @@ const Register: React.FC = () => {
           <div className="text-red-600 text-sm mb-1">{formik.errors.password}</div>
         ) : null}
 
-        {error && <p className="text-red-600 text-sm mb-2 text-center">{error}</p>}
-        {success && <p className="text-green-600 text-sm mb-2 text-center">{success}</p>}
-
         <button
           type="submit"
           className="bg-[#134074] py-1 text-white rounded cursor-pointer hover:bg-[#0e2e57]"
         >
-          Sign Up
+          Create User
         </button>
       </form>
-
-      <p className="mt-3">
-        Already have an account?{" "}
-        <a href="/login" className="text-[#134074] font-semibold hover:underline">
-          Sign in here
-        </a>
-      </p>
     </div>
   );
 };
 
-export default Register;
+export default CreateUser;
