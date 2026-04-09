@@ -16,13 +16,7 @@ const TableRoom = () => {
     const t = localStorage.getItem("token");
     if (t) setToken(t);
     fetchRooms();
-    
-    
   }, []);
-
-  useEffect(()=>{
-    console.log(rooms);
-  })
   const handleOpenModal = () => {
     if (openCreateRoom) {
       setOpenCreateRoom(false);
@@ -99,7 +93,7 @@ const TableRoom = () => {
           className="flex justify-around max-w-full m-4 bg-[#134074] p-4 text-white"
         >
           <p>ID: {r.id}</p>
-          {r.available ? <p>YES</p> : <p>NO</p>}
+          {r.inService ? <p>IN SERVICE</p> : <p>OUT OF SERVICE</p>}
 
           <p>Number: {r.number}</p>
           <p>Price: ${r.price}</p>

@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-  "build": "tsc -p tsconfig.json",
+  "build": "npm --prefix ../../domain run build && tsc -p tsconfig.json",
   "start": "node dist/server.js",
   "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
   "test": "jest --passWithNoTests"

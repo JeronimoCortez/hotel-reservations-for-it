@@ -1,7 +1,21 @@
 import type { ICreateReservation } from "../types/ICreateReservation";
 import type { Reservation } from "../types/Reservation.interface";
+import type { ReservationStatus } from "../types/ReservationStatus.enum";
 
 const API_URL = import.meta.env.VITE_API_URL;
+
+function normalizeReservation(input: any): Reservation {
+  return {
+    id: String(input.id ?? input.reservationId),
+    userId: String(input.userId),
+    roomId: String(input.roomId),
+    startDate: String(input.startDate),
+    endDate: String(input.endDate),
+    status: (input.status ?? "PENDING") as ReservationStatus,
+    createdAt: input.createdAt,
+    updatedAt: input.updatedAt,
+  };
+}
 
 export const reservationService = {
   listAll: async (token: string): Promise<Reservation[]> => {
@@ -10,49 +24,56 @@ export const reservationService = {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (!res.ok) throw new Error("Failed to list reservations.");
-      return await res.json();
+      const data = await res.json();
+      return Array.isArray(data) ? data.map(normalizeReservation) : [];
     } catch (error) {
       console.error("Error listing reservations:", error);
       throw error;
     }
   },
 
-  listByUser: async (userId: string, token?: string): Promise<Reservation[]> => {
+  listByUser: async (userId: string, token: string): Promise<Reservation[]> => {
     try {
-      const headers: Record<string, string> = {};
-      if (token) headers.Authorization = `Bearer ${token}`;
-      const res = await fetch(`${API_URL}/reservations/user/${userId}`, { headers });
+      const res = await fetch(`${API_URL}/reservations/user/${userId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       if (!res.ok) throw new Error("Failed to list reservations for user.");
-      return await res.json();
+      const data = await res.json();
+      return Array.isArray(data) ? data.map(normalizeReservation) : [];
     } catch (error) {
       console.error("Error listing reservations by user:", error);
       throw error;
     }
   },
 
-  create: async (payload: ICreateReservation, token?: string): Promise<Reservation> => {
+  create: async (payload: ICreateReservation, token: string): Promise<Reservation> => {
     try {
-      const headers: Record<string, string> = { "Content-Type": "application/json" };
-      if (token) headers.Authorization = `Bearer ${token}`;
       const res = await fetch(`${API_URL}/reservations`, {
         method: "POST",
-        headers,
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify(payload),
       });
       if (!res.ok) throw new Error("Failed to create reservation.");
-      return await res.json();
+      const data = await res.json();
+      return normalizeReservation({
+        id: data.reservationId ?? data.id,
+        userId: data.userId,
+        roomId: data.roomId,
+        startDate: data.startDate,
+        endDate: data.endDate,
+        status: data.status,
+      });
     } catch (error) {
       console.error("Error creating reservation:", error);
       throw error;
     }
   },
 
-  confirm: async (reservationId: string, token: string): Promise<Reservation> => {
+  confirm: async (reservationId: string, token: string): Promise<{ reservationId: string; status: ReservationStatus }> => {
     try {
       const res = await fetch(`${API_URL}/reservations/confirm/${reservationId}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ reservationId }),
+        headers: { Authorization: `Bearer ${token}` },
       });
       if (!res.ok) throw new Error("Failed to confirm reservation.");
       return await res.json();
@@ -62,17 +83,13 @@ export const reservationService = {
     }
   },
 
-  cancel: async (reservationId: string, requesterUserId: string, token?: string): Promise<Reservation | null> => {
+  cancel: async (reservationId: string, token: string): Promise<{ reservationId: string; status: ReservationStatus }> => {
     try {
-      const headers: Record<string, string> = { "Content-Type": "application/json" };
-      if (token) headers.Authorization = `Bearer ${token}`;
       const res = await fetch(`${API_URL}/reservations/cancel/${reservationId}`, {
         method: "PUT",
-        headers,
-        body: JSON.stringify({ reservationId, requesterUserId }),
+        headers: { Authorization: `Bearer ${token}` },
       });
       if (!res.ok) throw new Error("Failed to cancel reservation.");
-      if (res.status === 204) return null;
       return await res.json();
     } catch (error) {
       console.error("Error cancelling reservation:", error);

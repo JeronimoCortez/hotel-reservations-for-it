@@ -1,6 +1,6 @@
 // middlewares/authorize.ts
 import { Request, Response, NextFunction } from "express";
-import { Roles } from "../../../../domain/src/types/Roles";
+import { Roles } from "../../../../domain/dist/types/Roles";
 
 type AuthRequest = Request & {
     user?: {

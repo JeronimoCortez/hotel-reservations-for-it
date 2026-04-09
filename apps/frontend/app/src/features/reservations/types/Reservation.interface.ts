@@ -1,14 +1,12 @@
-import type { Room } from "../../rooms/types/Room.interface";
-import type { User } from "../../users/types/User.interface";
 import type { ReservationStatus } from "./ReservationStatus.enum";
 
 export interface Reservation {
   id: string;
-  user: User;
-  room: Room;
-  startDate: string; 
-  endDate: string;  
-  status?: ReservationStatus;
+  userId: string;
+  roomId: string;
+  startDate: string; // YYYY-MM-DD
+  endDate: string; // YYYY-MM-DD (exclusive)
+  status: ReservationStatus;
   createdAt?: string;
   updatedAt?: string;
 }

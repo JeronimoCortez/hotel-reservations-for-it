@@ -5,10 +5,10 @@ import { useRoomStore } from "../../../store/RoomStore";
 vi.mock("../../../features/rooms/services/RoomService", () => ({
   roomService: {
     getAllRooms: vi.fn(() =>
-      Promise.resolve([{ id: "r1", name: "Room 1", capacity: 4 }])
+      Promise.resolve([{ id: "r1", number: 101, type: "single", price: 100, inService: true }])
     ),
     createRoom: vi.fn((data: any) =>
-      Promise.resolve({ id: "r2", ...data })
+      Promise.resolve({ id: "r2", ...data, inService: true })
     ),
     updateRoom: vi.fn((id: string, data: any) =>
       Promise.resolve({ id, ...data })
@@ -65,17 +65,17 @@ describe("useRoomStore", () => {
   });
 
   it("createRoom creates a room when token exists", async () => {
-    localStorage.setItem("token", "fake-token");
+    useRoomStore.setState({ token: "fake-token" });
 
     await act(async () => {
-      const newRoom = await useRoomStore.getState().createRoom({ name: "Test Room", capacity: 8 } as any);
+      const newRoom = await useRoomStore.getState().createRoom({ number: 102, type: "double", price: 150 } as any);
       expect(newRoom).toBeDefined();
       expect(newRoom?.id).toBe("r2");
     });
 
     const state = useRoomStore.getState();
     expect(roomService.createRoom).toHaveBeenCalledWith(
-      { name: "Test Room", capacity: 8 },
+      { number: 102, type: "double", price: 150 },
       "fake-token"
     );
     expect(state.rooms.length).toBe(1);

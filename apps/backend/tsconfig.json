@@ -8,10 +8,9 @@
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true,
-    "declaration": true,
-    "declarationMap": true,
-    "types": ["jest", "node"]
+    "moduleResolution": "Node",
+    "types": ["node"]
   },
-  "include": ["src"],
-  "exclude": ["src/tests"]
+  "include": ["src"]
 }
+

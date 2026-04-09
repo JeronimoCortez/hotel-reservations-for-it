@@ -37,10 +37,10 @@ const CreateReservationForm: React.FC<ICreateReservationFormProps> = ({ onClose 
       startDate: Yup.string().required("Start date is required"),
       endDate: Yup.string()
         .required("End date is required")
-        .test("end-after-start", "End date must be the same or after start date", function (value) {
+        .test("end-after-start", "End date must be after start date", function (value) {
           const start = this.parent.startDate;
           if (!value || !start) return false;
-          return new Date(value).getTime() >= new Date(start).getTime();
+          return new Date(value).getTime() > new Date(start).getTime();
         }),
     }),
     onSubmit: async (values, { resetForm }) => {
@@ -48,8 +48,8 @@ const CreateReservationForm: React.FC<ICreateReservationFormProps> = ({ onClose 
         const body = {
           userId: values.userId,
           roomId: values.roomId,
-          startDate: new Date(values.startDate).toISOString(),
-          endDate: new Date(values.endDate).toISOString(),
+          startDate: values.startDate,
+          endDate: values.endDate,
         };
 
         Swal.fire({

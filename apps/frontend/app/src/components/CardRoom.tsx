@@ -17,8 +17,8 @@ const CardRoom: FC<IPropsCardRoom> = ({ room }) => {
   const { createReservation } = useReservationStore();
 
   const handleReserve = async () => {
-    const checkInInput = document.getElementById("check-in") as HTMLInputElement;
-    const checkOutInput = document.getElementById("check-out") as HTMLInputElement;
+    const checkInInput = document.getElementById(`check-in-${room.id}`) as HTMLInputElement;
+    const checkOutInput = document.getElementById(`check-out-${room.id}`) as HTMLInputElement;
 
     if (!checkInInput?.value || !checkOutInput?.value) {
       await Swal.fire({
@@ -30,33 +30,18 @@ const CardRoom: FC<IPropsCardRoom> = ({ room }) => {
       return;
     }
 
+    if (checkOutInput.value <= checkInInput.value) {
+      await Swal.fire({
+        icon: "warning",
+        title: "Invalid dates",
+        text: "Check-out must be after check-in.",
+        confirmButtonColor: "#134074",
+      });
+      return;
+    }
+
     try {
-      const userData = localStorage.getItem("user-storage");
-      if (!userData) {
-        await Swal.fire({
-          icon: "error",
-          title: "User not found",
-          text: "Please log in before making a reservation.",
-          confirmButtonColor: "#134074",
-        });
-        return;
-      }
-
-      const { state } = JSON.parse(userData);
-      const userId = state?.user?.id;
-
-      if (!userId) {
-        await Swal.fire({
-          icon: "error",
-          title: "Invalid user data",
-          text: "Could not retrieve user information.",
-          confirmButtonColor: "#134074",
-        });
-        return;
-      }
-
       await createReservation({
-        userId,
         roomId: room.id,
         startDate: checkInInput.value,
         endDate: checkOutInput.value,
@@ -104,7 +89,7 @@ const CardRoom: FC<IPropsCardRoom> = ({ room }) => {
             name="checkin"
             aria-label="Check-in date"
             type="date"
-            id="check-in"
+            id={`check-in-${room.id}`}
             className="rounded-md px-3 py-2 border border-[#fff] text-white bg-transparent"
           />
         </label>
@@ -115,7 +100,7 @@ const CardRoom: FC<IPropsCardRoom> = ({ room }) => {
             name="checkout"
             aria-label="Check-out date"
             type="date"
-            id="check-out"
+            id={`check-out-${room.id}`}
             className="rounded-md px-3 py-2 border border-[#fff] text-white bg-transparent"
           />
         </label>
@@ -125,10 +110,11 @@ const CardRoom: FC<IPropsCardRoom> = ({ room }) => {
         <button
           onClick={handleReserve}
           type="button"
+          disabled={!room.inService}
           className="w-full bg-white text-[#134074] font-semibold py-2 rounded-md shadow-sm hover:shadow-md transition cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
           aria-label={`Reserve ${room.type} room`}
         >
-          Reserve
+          {room.inService ? "Reserve" : "Out of service"}
         </button>
       </div>
     </div>

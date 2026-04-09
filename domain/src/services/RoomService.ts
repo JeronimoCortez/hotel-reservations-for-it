@@ -1,19 +1,20 @@
 import { Reservation } from "../entities/Reservation";
 import { Room } from "../entities/Room";
 import { Status } from "../types/Status";
+import { DateRange } from "../value-objects/DateRange";
 
 export class RoomService {
-    static isAvailable(room: Room, reservations: Reservation[], startDate: Date, endDate: Date): boolean {
-        return !reservations.some(
-            r =>
-                r.room.id === room.id &&
-                r.status === Status.CONFIRMED &&
-                ((startDate >= r.startDate && startDate < r.endDate) ||
-                    (endDate > r.startDate && endDate <= r.endDate))
-        )
+    static isAvailable(room: Room, reservations: Reservation[], requested: DateRange): boolean {
+        if (!room.inService) return false;
+
+        return !reservations.some((r) => {
+            if (r.room.id !== room.id) return false;
+            if (r.status !== Status.CONFIRMED) return false;
+            return r.range.overlaps(requested);
+        });
     }
 
-    static finAvailableRooms(rooms: Room[], reservations: Reservation[], startDate: Date, endDate: Date): Room[] {
-        return rooms.filter(room => this.isAvailable(room, reservations, startDate, endDate))
+    static findAvailableRooms(rooms: Room[], reservations: Reservation[], requested: DateRange): Room[] {
+        return rooms.filter((room) => this.isAvailable(room, reservations, requested));
     }
 }

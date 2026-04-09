@@ -3,17 +3,20 @@ import { Room } from "../entities/Room";
 import { User } from "../entities/User";
 import { Status } from "../types/Status";
 import { RoomService } from "./RoomService";
+import { DateRange } from "../value-objects/DateRange";
+import { LocalDate } from "../value-objects/LocalDate";
 
 export class ReservationService {
     static createReservation(
         id: string,
         user: User,
         room: Room,
-        startDate: Date,
-        endDate: Date,
+        startDate: LocalDate,
+        endDate: LocalDate,
         existingReservations: Reservation[]
     ): Reservation | null {
-        if (!RoomService.isAvailable(room, existingReservations, startDate, endDate)) {
+        const requested = DateRange.create(startDate, endDate);
+        if (!RoomService.isAvailable(room, existingReservations, requested)) {
             return null;
         }
         const reservation = new Reservation(id, user, room, startDate, endDate, Status.PENDING);

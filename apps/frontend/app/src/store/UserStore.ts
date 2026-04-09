@@ -38,10 +38,16 @@ export const useUserStore = create<UserState>()(
           set({ token: null, user: null });
           try {
             localStorage.removeItem("user-storage");
+            localStorage.removeItem("token");
           } catch (e) {
             // noop
           }
         } else {
+          try {
+            localStorage.setItem("token", token);
+          } catch (e) {
+            // noop
+          }
           set({ token });
         }
       },
@@ -78,8 +84,11 @@ export const useUserStore = create<UserState>()(
       registerUser: async (payload) => {
         set({ loading: true, error: null });
         try {
-          await userService.register(payload);
-          set({ loading: false });
+          const res = await userService.register(payload);
+          set({ token: res.token, user: res.user, loading: false });
+          try {
+            localStorage.setItem("token", res.token);
+          } catch (e) { }
         } catch (err: any) {
           set({ error: err?.message ?? "Failed to register user", loading: false });
         }
@@ -90,7 +99,10 @@ export const useUserStore = create<UserState>()(
         try {
           const res = await userService.login(payload);
           const token = res.token;
-          set({ token, loading: false });
+          set({ token, user: res.user, loading: false });
+          try {
+            localStorage.setItem("token", token);
+          } catch (e) { }
           return token;
         } catch (err: any) {
           set({ error: err?.message ?? "Failed to login", loading: false });

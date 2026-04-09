@@ -1,50 +1,58 @@
 import { Reservation } from "../../entities/Reservation";
 import { RoomService } from "../../services/RoomService";
 import { Status } from "../../types/Status";
+import { ConflictError, NotFoundError } from "../../errors/DomainErrors";
 import { IReservationRepository } from "../ports/IReservationRepository";
+import { IIdGenerator } from "../ports/IIdGenerator";
 import { IRoomRepository } from "../ports/IRoomRepository";
 import { IUserRepository } from "../ports/IUserRepository";
 import { CreateReservationDTO } from "./CreateReservationDTO";
 import { CreateReservationResult } from "./CreateReservationResult";
-import { v4 as uuid } from "uuid";
+import { assertLocalDate } from "../../value-objects/LocalDate";
+import { DateRange } from "../../value-objects/DateRange";
 
 
 export class CreateReservationUseCase {
     constructor(
         private userRepo: IUserRepository,
         private roomRepo: IRoomRepository,
-        private reservationRepo: IReservationRepository
+        private reservationRepo: IReservationRepository,
+        private idGenerator: IIdGenerator
     ) {
 
     }
 
     async execute(dto: CreateReservationDTO): Promise<CreateReservationResult> {
-        const start = new Date(dto.startDate);
-        const end = new Date(dto.endDate);
-        if (isNaN(start.getTime()) || isNaN(end.getTime())) throw new Error("Invalid dates");
-        if (end <= start) throw new Error("endDate must be after startDate");
+        assertLocalDate(dto.startDate, "startDate");
+        assertLocalDate(dto.endDate, "endDate");
+        const requested = DateRange.create(dto.startDate, dto.endDate);
 
         const user = await this.userRepo.findById(dto.userId);
-        if (!user) throw new Error("User not found");
+        if (!user) throw new NotFoundError("User not found");
 
         const room = await this.roomRepo.findById(dto.roomId);
-        if (!room) throw new Error("Room not found");
+        if (!room) throw new NotFoundError("Room not found");
+        if (!room.inService) throw new ConflictError("Room is out of service");
 
-        const existing = await this.reservationRepo.findByRoomAndRange(room.id, start, end);
+        const existing = await this.reservationRepo.findByRoomAndRange(
+            room.id,
+            requested.start,
+            requested.end
+        );
 
-        if (!RoomService.isAvailable(room, existing, start, end)) {
-            throw new Error("Room not available for request dates");
+        if (!RoomService.isAvailable(room, existing, requested)) {
+            throw new ConflictError("Room not available for request dates");
         }
 
-        const id = uuid();
-        const reservation = new Reservation(id, user, room, start, end, Status.PENDING);
+        const id = this.idGenerator.generate();
+        const reservation = new Reservation(id, user, room, requested.start, requested.end, Status.PENDING);
         await this.reservationRepo.save(reservation);
 
         return {
             reservationId: id,
             status: reservation.status,
-            startDate: reservation.startDate.toISOString(),
-            endDate: reservation.endDate.toISOString(),
+            startDate: reservation.startDate,
+            endDate: reservation.endDate,
             roomId: room.id,
             userId: user.id
         }

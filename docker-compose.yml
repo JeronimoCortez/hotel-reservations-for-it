@@ -18,8 +18,8 @@ services:
 
   backend:
     build:
-      context: ./apps/backend
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: ./apps/backend/Dockerfile
     container_name: hotel-backend
     restart: unless-stopped
     depends_on:
@@ -29,11 +29,10 @@ services:
       - ./apps/backend/.env
     environment:
       PORT: 4000
+      MONGO_URI: "mongodb://root:example@mongo:27017/hotel?authSource=admin"
       NODE_ENV: production
     ports:
       - "4000:4000"
-    volumes:
-      - /app/node_modules
     logging:
       options:
         max-size: "10m"

@@ -1,6 +1,6 @@
 export interface ICreateReservation {
-  userId: string;
   roomId: string;
+  userId?: string; // solo para ADMIN
   startDate: string;
   endDate: string; 
 }

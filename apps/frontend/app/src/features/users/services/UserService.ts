@@ -5,7 +5,7 @@ import type { User } from "../types/User.interface";
 const API_URL = import.meta.env.VITE_API_URL;
 
 export const userService = {
-  register: async (payload: RegisterUser): Promise<{ message: string }> => {
+  register: async (payload: RegisterUser): Promise<{ token: string; user: User }> => {
     try {
       const res = await fetch(`${API_URL}/users/register`, {
         method: "POST",
@@ -20,7 +20,7 @@ export const userService = {
     }
   },
 
-  login: async (payload: LoginPayload): Promise<{ token: string }> => {
+  login: async (payload: LoginPayload): Promise<{ token: string; user: User }> => {
     try {
       const res = await fetch(`${API_URL}/users/login`, {
         method: "POST",

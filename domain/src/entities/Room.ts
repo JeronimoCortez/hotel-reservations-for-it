@@ -8,14 +8,14 @@ export class Room implements IRoom {
         public number: number,
         public type: RoomType,
         public price: number,
-        public available: boolean
+        public inService: boolean,
     ) { }
 
-    markAvailable() {
-        this.available = true;
+    putInService() {
+        this.inService = true;
     }
 
-    markUnavailable() {
-        this.available = false;
+    takeOutOfService() {
+        this.inService = false;
     }
 }

@@ -2,8 +2,8 @@ import React from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import Swal from "sweetalert2";
-import { authService } from "../features/auth/services/AuthService";
 import { CircleX } from "lucide-react";
+import { userService } from "../features/users/services/UserService";
 
 type ICreateUserProps = {
     onClose: VoidFunction;
@@ -24,11 +24,11 @@ const CreateUser: React.FC<ICreateUserProps> = ({onClose}) => {
     }),
     onSubmit: async (values, { resetForm }) => {
       try {
-        const res = await authService.register(values.name, values.email, values.password);
+        const res = await userService.register(values);
         await Swal.fire({
           icon: "success",
           title: "User created",
-          text: res?.message || "User created successfully!",
+          text: `User ${res.user.name} created successfully!`,
           showConfirmButton: false,
           timer: 1500,
         });

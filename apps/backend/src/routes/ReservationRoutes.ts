@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { authenticate } from "../middlewares/auth";
 import { authorize } from "../middlewares/authorize";
-import { Roles } from "../../../../domain/src/types/Roles";
+import { Roles } from "../../../../domain/dist/types/Roles";
 import { ReservationController } from "../controllers/ReservationController";
 
 

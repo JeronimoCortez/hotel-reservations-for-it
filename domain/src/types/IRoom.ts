@@ -5,5 +5,5 @@ export interface IRoom {
     number: number;
     type: RoomType;
     price: number;
-    available: boolean;
+    inService: boolean;
 }

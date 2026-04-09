@@ -7,7 +7,7 @@ const roomExample: Room = {
   number: 101,
   type: "single",
   price: 100,
-  available: true,
+  inService: true,
 };
 
 const meta: Meta<typeof CardRoom> = {

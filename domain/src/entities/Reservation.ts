@@ -2,6 +2,9 @@ import { IReservation } from "../types/IReservation";
 import { Status } from "../types/Status";
 import { Room } from "./Room";
 import { User } from "./User";
+import { InvariantError } from "../errors/DomainErrors";
+import { assertLocalDate, LocalDate } from "../value-objects/LocalDate";
+import { DateRange } from "../value-objects/DateRange";
 
 
 export class Reservation implements IReservation {
@@ -9,21 +12,27 @@ export class Reservation implements IReservation {
         public id: string,
         public user: User,
         public room: Room,
-        public startDate: Date,
-        public endDate: Date,
+        public startDate: LocalDate,
+        public endDate: LocalDate, // exclusive
         public status: Status,
-    ) { }
+    ) {
+        assertLocalDate(startDate, "startDate");
+        assertLocalDate(endDate, "endDate");
+        DateRange.create(startDate, endDate);
+    }
+
+    get range(): DateRange {
+        return DateRange.create(this.startDate, this.endDate);
+    }
 
     confirm() {
         if (this.status === Status.CANCELLED) {
-            throw new Error("Cannot confirm a cancelled reservation.");
+            throw new InvariantError("Cannot confirm a cancelled reservation");
         }
         this.status = Status.CONFIRMED;
-        this.room.markUnavailable();
     }
 
     cancel() {
         this.status = Status.CANCELLED;
-        this.room.markAvailable();
     }
 }

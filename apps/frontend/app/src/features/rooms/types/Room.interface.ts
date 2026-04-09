@@ -3,5 +3,5 @@ export interface Room {
   number: number;
   type: "single" | "double" | "suite";
   price: number;
-  available: boolean;
+  inService: boolean;
 }

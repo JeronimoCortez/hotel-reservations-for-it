@@ -6,10 +6,10 @@ import { useRoomStore } from "../../../store/RoomStore";
 vi.mock("../services/RoomService", () => ({
   roomService: {
     getAllRooms: vi.fn(() => Promise.resolve([
-      { id: "1", number: 101, type: "single", price: 100, available: true },
-      { id: "2", number: 102, type: "double", price: 150, available: false },
+      { id: "1", number: 101, type: "single", price: 100, inService: true },
+      { id: "2", number: 102, type: "double", price: 150, inService: false },
     ])),
-    createRoom: vi.fn((data) => Promise.resolve({ ...data, id: "3", available: true })),
+    createRoom: vi.fn((data) => Promise.resolve({ ...data, id: "3", inService: true })),
     updateRoom: vi.fn((id, data) => Promise.resolve({ id, ...data })),
     deleteRoom: vi.fn(() => Promise.resolve(true)),
   },
@@ -30,6 +30,7 @@ describe("RoomStore", () => {
 
   it("createRoom adds a new room", async () => {
     await act(async () => {
+      useRoomStore.getState().setToken("token");
       await useRoomStore.getState().createRoom({ number: 103, type: "suite", price: 200 });
     });
     const { rooms } = useRoomStore.getState();

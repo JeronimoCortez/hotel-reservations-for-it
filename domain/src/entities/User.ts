@@ -15,7 +15,7 @@ export class User implements IUser {
         this.password = newPassword;
     }
 
-    idAdmin(): boolean {
+    isAdmin(): boolean {
         return this.role === Roles.ADMIN;
     }
 }

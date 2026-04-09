@@ -4,8 +4,8 @@ import { useUserStore } from "../../../store/UserStore";
 
 vi.mock("../../../features/users/services/UserService", () => ({
   userService: {
-    login: vi.fn(() => Promise.resolve({ token: "fake-token" })),
-    register: vi.fn(() => Promise.resolve({ message: "User created" })),
+    login: vi.fn(() => Promise.resolve({ token: "fake-token", user: { id: "u1", name: "Test", email: "a@b.com", role: "USER" } })),
+    register: vi.fn(() => Promise.resolve({ token: "fake-token", user: { id: "u1", name: "Test", email: "a@b.com", role: "USER" } })),
     listAll: vi.fn(() => Promise.resolve([
       { id: "u1", name: "Test", email: "a@b.com", role: "USER" }
     ])),
@@ -27,6 +27,7 @@ describe("UserStore", () => {
   });
 
   it("fetchUsers loads all users", async () => {
+    useUserStore.getState().setToken("fake-token");
     await act(async () => {
       await useUserStore.getState().fetchUsers();
     });

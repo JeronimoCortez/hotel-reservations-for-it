@@ -14,7 +14,7 @@ const TableReservation = () => {
     setToken,
     confirmReservation,
     cancelReservation
-  } = useReservationStore() as any;
+  } = useReservationStore();
 
   const [openModal, setOpenModal] = useState<boolean>(false);
 
@@ -84,8 +84,7 @@ const TableReservation = () => {
   };
 
   const handleCancel = async (
-    reservationId: string,
-    requesterUserId: string
+    reservationId: string
   ) => {
     try {
       // 🔹 Confirmación previa
@@ -110,7 +109,7 @@ const TableReservation = () => {
         },
       });
 
-      await cancelReservation(reservationId, requesterUserId);
+      await cancelReservation(reservationId);
 
       Swal.close();
 
@@ -149,19 +148,15 @@ const TableReservation = () => {
           className="flex flex-wrap items-center justify-around max-w-full m-4 bg-[#134074] p-4 text-white rounded"
         >
           <p className="min-w-[120px]">ID: {r.id}</p>
-          <p className="min-w-[140px]">User: {r.user.name}</p>
-          <p className="min-w-[140px]">Room: {r.room.number}</p>
-          <p className="min-w-[160px]">
-            From: {new Date(r.startDate).toLocaleDateString()}
-          </p>
-          <p className="min-w-[160px]">
-            To: {new Date(r.endDate).toLocaleDateString()}
-          </p>
-          <p className="min-w-[110px]">Status: {r.status ?? "pending"}</p>
+          <p className="min-w-[220px]">User: {r.userId}</p>
+          <p className="min-w-[220px]">Room: {r.roomId}</p>
+          <p className="min-w-[160px]">From: {r.startDate}</p>
+          <p className="min-w-[160px]">To: {r.endDate}</p>
+          <p className="min-w-[140px]">Status: {r.status}</p>
 
           <div className="flex items-center gap-2">
             <button
-            onClick={() => handleCancel(r.id, r.user.id)}
+            onClick={() => handleCancel(r.id)}
               className="p-2 rounded bg-white/10 hover:bg-white/20"
               aria-label={`Cancel reservation ${r.id}`}
             >

@@ -1,6 +1,6 @@
-import { Room } from "../../../../domain/src/entities/Room";
-import { RoomType } from "../../../../domain/src/types/RoomType";
-import { IRoomRepository } from "../../../../domain/src/use-cases/ports/IRoomRepository";
+import { Room } from "../../../../domain/dist/entities/Room";
+import { RoomType } from "../../../../domain/dist/types/RoomType";
+import { IRoomRepository } from "../../../../domain/dist/use-cases/ports/IRoomRepository";
 import RoomModel from "../models/RoomModel";
 
 
@@ -23,21 +23,21 @@ export class MongoRoomRepository implements IRoomRepository {
         if (!room) return null;
         const type = mapToRoomType(room.type);
 
-        return new Room(String(room._id), room.number ?? 0, type, room.price ?? 0, room.available ?? false)
+        return new Room(String(room._id), room.number ?? 0, type, room.price ?? 0, room.inService ?? true)
     }
 
     async findAll(): Promise<Room[]> {
         const rooms = await RoomModel.find().lean();
         return rooms.map((r) => {
             const type = mapToRoomType(r.type);
-            return new Room(String(r._id), r.number ?? 0, type, r.price ?? 0, r.available ?? false)
+            return new Room(String(r._id), r.number ?? 0, type, r.price ?? 0, r.inService ?? true)
         })
     }
 
     async save(room: Room): Promise<void> {
         await RoomModel.updateOne(
             { _id: room.id },
-            { _id: room.id, number: room.number, type: room.type, price: room.price, available: room.available },
+            { _id: room.id, number: room.number, type: room.type, price: room.price, inService: room.inService },
             { upsert: true }
         )
     }

@@ -5,7 +5,7 @@ import { Roles } from "../types/Roles";
 import { RoomType } from "../types/RoomType";
 import { Status } from "../types/Status";
 import { CreateReservationUseCase } from "../use-cases/create-reservation/CreateReservationUseCase";
-import { InMemoryReservationRepo, InMemoryRoomRepo, InMemoryUserRepo } from "./InMemoryRepo"
+import { InMemoryReservationRepo, InMemoryRoomRepo, InMemoryUserRepo } from "./inMemoryRepo"
 
 
 describe("CreateReservationUseCase", () => {
@@ -13,12 +13,13 @@ describe("CreateReservationUseCase", () => {
     let roomRepo: InMemoryRoomRepo;
     let reservationRepo: InMemoryReservationRepo;
     let useCase: CreateReservationUseCase;
+    const idGenerator = { generate: () => "res-generated" };
 
     beforeEach(() => {
         userRepo = new InMemoryUserRepo();
         roomRepo = new InMemoryRoomRepo();
         reservationRepo = new InMemoryReservationRepo();
-        useCase = new CreateReservationUseCase(userRepo, roomRepo, reservationRepo);
+        useCase = new CreateReservationUseCase(userRepo, roomRepo, reservationRepo, idGenerator);
     });
 
     test("creates reservation when room available", async () => {
@@ -30,13 +31,15 @@ describe("CreateReservationUseCase", () => {
         const result = await useCase.execute({
             userId: "u1",
             roomId: "r1",
-            startDate: "2025-11-01T00:00:00.000Z",
-            endDate: "2025-11-03T00:00:00.000Z"
+            startDate: "2025-11-01",
+            endDate: "2025-11-03"
         })
 
         expect(result).toHaveProperty("reservationId");
         expect(result.roomId).toBe("r1");
         expect(result.userId).toBe("u1");
+        expect(result.startDate).toBe("2025-11-01");
+        expect(result.endDate).toBe("2025-11-03");
 
     })
 
@@ -46,15 +49,15 @@ describe("CreateReservationUseCase", () => {
         const room = new Room("r1", 101, RoomType.SINGLE, 15000, true);
         await roomRepo.save(room);
 
-        const existing = new Reservation("e1", user, room, new Date("2025-11-02"), new Date("2025-11-05"), Status.CONFIRMED as any);
+        const existing = new Reservation("e1", user, room, "2025-11-02", "2025-11-05", Status.CONFIRMED);
         await reservationRepo.save(existing);
 
         await expect(useCase.execute({
             userId: "u1",
             roomId: "r1",
-            startDate: "2025-11-03T00:00:00.000Z",
-            endDate: "2025-11-04T00:00:00.000Z"
-        })).rejects.toThrow("Room not available")
+            startDate: "2025-11-03",
+            endDate: "2025-11-04"
+        })).rejects.toThrow("Room not available for request dates")
     })
 
     test("thorws for invalid dates", async () => {
@@ -68,7 +71,7 @@ describe("CreateReservationUseCase", () => {
             roomId: "r1",
             startDate: "invalid",
             endDate: "also-invalid"
-        })).rejects.toThrow("Invalid dates")
+        })).rejects.toThrow("startDate must be in YYYY-MM-DD format")
     })
 
     test("throws when user or room not found", async () => {

@@ -21,7 +21,7 @@ const EditRoomForm: FC<IEditRoomFormProps> = ({ onClose, room }) => {
       number: room.number ?? 0,
       type: room.type ?? "single",
       price: room.price ?? 0,
-      available: room.available ?? true,
+      inService: room.inService ?? true,
     },
     validationSchema: Yup.object({
       number: Yup.number().required("Room number is required").min(1),
@@ -29,7 +29,7 @@ const EditRoomForm: FC<IEditRoomFormProps> = ({ onClose, room }) => {
         .oneOf(["single", "double", "suite"])
         .required("Type is required"),
       price: Yup.number().required("Price is required").min(0),
-      available: Yup.boolean(),
+      inService: Yup.boolean(),
     }),
     onSubmit: async (values, { resetForm }) => {
       try {
@@ -116,14 +116,14 @@ const EditRoomForm: FC<IEditRoomFormProps> = ({ onClose, room }) => {
 
         <div className="flex items-center gap-2">
           <input
-            id="available"
-            name="available"
+            id="inService"
+            name="inService"
             type="checkbox"
             onChange={formik.handleChange}
-            checked={!!formik.values.available}
+            checked={!!formik.values.inService}
             className="w-4 h-4"
           />
-          <label htmlFor="available">Available</label>
+          <label htmlFor="inService">In service</label>
         </div>
 
         <button

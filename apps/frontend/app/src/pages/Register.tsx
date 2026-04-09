@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
-import { authService } from "../features/auth/services/AuthService";
 import { useNavigate } from "react-router-dom";
 import { useUserStore } from "../store/UserStore";
 
@@ -9,7 +8,7 @@ const Register: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const navigate = useNavigate();
-  const { setToken, setUser } = useUserStore();
+  const { registerUser } = useUserStore();
 
   const formik = useFormik({
     initialValues: {
@@ -26,12 +25,8 @@ const Register: React.FC = () => {
       setError(null);
       setSuccess(null);
       try {
-        const res = await authService.register(values.name, values.email, values.password);
-        setSuccess(res?.message || "Account created successfully!");
-        const { token, user } = await authService.login(values.email, values.password);
-        localStorage.setItem("token", token);
-        setToken(token);
-        setUser(user);
+        await registerUser({ name: values.name, email: values.email, password: values.password });
+        setSuccess("Account created successfully!");
         navigate("/");
       } catch (err: any) {
         if (err?.response?.data?.message) {

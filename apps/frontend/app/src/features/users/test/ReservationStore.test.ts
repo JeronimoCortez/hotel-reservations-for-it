@@ -13,20 +13,20 @@ vi.mock("../../../features/reservations/services/ReservationService", () => ({
   reservationService: {
     listByUser: vi.fn(() =>
       Promise.resolve([
-        { id: "r1", user: { id: "u1" }, status: "PENDING" },
+        { id: "r1", userId: "u1", roomId: "room-1", startDate: "2025-01-01", endDate: "2025-01-02", status: "PENDING" },
       ])
     ),
     listAll: vi.fn(() =>
       Promise.resolve([
-        { id: "r2", user: { id: "u2" }, status: "CONFIRMED" },
+        { id: "r2", userId: "u2", roomId: "room-2", startDate: "2025-02-01", endDate: "2025-02-02", status: "CONFIRMED" },
       ])
     ),
-    create: vi.fn((data: any) => Promise.resolve({ id: "r3", ...data })),
-    confirm: vi.fn((id: string) =>
-      Promise.resolve({ id, status: "CONFIRMED" })
+    create: vi.fn((data: any) => Promise.resolve({ id: "r3", ...data, status: "PENDING" })),
+    confirm: vi.fn((reservationId: string) =>
+      Promise.resolve({ reservationId, status: "CONFIRMED" })
     ),
     cancel: vi.fn((reservationId: string) =>
-      Promise.resolve({ id: reservationId, status: "CANCELLED" })
+      Promise.resolve({ reservationId, status: "CANCELLED" })
     ),
   },
 }));
@@ -47,12 +47,13 @@ describe("useReservationStore", () => {
   });
 
   it("fetchReservations loads reservations by user", async () => {
+    useReservationStore.setState({ token: "token" });
     await act(async () => {
       await useReservationStore.getState().fetchReservations("u1");
     });
 
     const { reservations, loading, error } = useReservationStore.getState();
-    expect(reservationService.listByUser).toHaveBeenCalledWith("u1", undefined);
+    expect(reservationService.listByUser).toHaveBeenCalledWith("u1", "token");
     expect(reservations.length).toBe(1);
     expect(reservations[0].id).toBe("r1");
     expect(loading).toBe(false);
@@ -73,15 +74,13 @@ describe("useReservationStore", () => {
   });
 
   it("refreshReservations calls fetchReservations with user's id", async () => {
-    useReservationStore.setState({
-      reservations: [{ id: "r1", user: { id: "u1" } } as any],
-    });
+    localStorage.setItem("token", "token");
 
     await act(async () => {
       await useReservationStore.getState().refreshReservations();
     });
 
-    expect(reservationService.listByUser).toHaveBeenCalledWith("u1", undefined);
+    expect(useReservationStore.getState().token).toBe("token");
   });
 
   it("createReservation shows error when token is missing", async () => {
@@ -93,7 +92,7 @@ describe("useReservationStore", () => {
     expect(Swal.fire).toHaveBeenCalledWith({
       icon: "error",
       title: "Unauthorized",
-      text: "You must be logged in as admin to confirm a reservation.",
+      text: "You must be logged in to create a reservation.",
     });
     expect(reservationService.create).not.toHaveBeenCalled();
   });
@@ -121,7 +120,7 @@ describe("useReservationStore", () => {
     expect(Swal.fire).toHaveBeenCalledWith({
       icon: "error",
       title: "Unauthorized",
-      text: "You must be logged in as admin to confirm a reservation.",
+      text: "You must be logged in to confirm a reservation.",
     });
     expect(reservationService.confirm).not.toHaveBeenCalled();
   });
@@ -133,8 +132,7 @@ describe("useReservationStore", () => {
     });
 
     await act(async () => {
-      const updated = await useReservationStore.getState().confirmReservation("r1");
-      expect(updated?.status).toBe("CONFIRMED");
+      await useReservationStore.getState().confirmReservation("r1");
     });
 
     const { reservations } = useReservationStore.getState();
@@ -144,13 +142,13 @@ describe("useReservationStore", () => {
 
   it("cancelReservation shows error when token is missing", async () => {
     await act(async () => {
-      await useReservationStore.getState().cancelReservation("r1", "u1");
+      await useReservationStore.getState().cancelReservation("r1");
     });
 
     expect(Swal.fire).toHaveBeenCalledWith({
       icon: "error",
       title: "Unauthorized",
-      text: "You must be logged in as admin to confirm a reservation.",
+      text: "You must be logged in to cancel a reservation.",
     });
     expect(reservationService.cancel).not.toHaveBeenCalled();
   });
@@ -162,12 +160,12 @@ describe("useReservationStore", () => {
     });
 
     await act(async () => {
-      await useReservationStore.getState().cancelReservation("r1", "u1");
+      await useReservationStore.getState().cancelReservation("r1");
     });
 
     const { reservations } = useReservationStore.getState();
     expect(reservations[0].status).toBe("CANCELLED");
-    expect(reservationService.cancel).toHaveBeenCalledWith("r1", "u1", "fake-token");
+    expect(reservationService.cancel).toHaveBeenCalledWith("r1", "fake-token");
   });
 
   it("setToken updates token in store", () => {

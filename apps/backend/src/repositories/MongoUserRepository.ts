@@ -1,6 +1,6 @@
-import { User } from "../../../../domain/src/entities/User";
-import { Roles } from "../../../../domain/src/types/Roles";
-import { IUserRepository } from "../../../../domain/src/use-cases/ports/IUserRepository";
+import { User } from "../../../../domain/dist/entities/User";
+import { Roles } from "../../../../domain/dist/types/Roles";
+import { IUserRepository } from "../../../../domain/dist/use-cases/ports/IUserRepository";
 import UserModel from "../models/UserModel";
 
 
@@ -18,7 +18,7 @@ export class MongoUserRepository implements IUserRepository {
         return new User(String(user._id), user.name ?? "", user.email ?? "", user.password ?? "", role);
     }
 
-    async findAll(): Promise<User[] | null> {
+    async findAll(): Promise<User[]> {
         const users = await UserModel.find().lean();
         return users.map((u) => {
             const role = u.role === Roles.ADMIN ? Roles.ADMIN : Roles.USER;

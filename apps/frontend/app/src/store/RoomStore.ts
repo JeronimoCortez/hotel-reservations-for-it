@@ -43,9 +43,7 @@ export const useRoomStore = create<RoomState>((set, get) => ({
   },
 
   createRoom: async (data) => {
-    const token = localStorage.getItem("token");
-    console.log("Room create, ", token);
-    
+    const token = get().token;
     if (!token) {
       set({ error: "Auth token required to create room." });
       return;

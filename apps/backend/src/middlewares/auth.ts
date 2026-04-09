@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import { Roles } from "../../../../domain/src/types/Roles";
+import { Roles } from "../../../../domain/dist/types/Roles";
 import jwt from "jsonwebtoken";
 
 type AuthRequest = Request & {

@@ -5,7 +5,7 @@ const roomSchema = new mongoose.Schema({
     number: Number,
     type: String,
     price: Number,
-    available: Boolean
+    inService: { type: Boolean, default: true }
 }, { timestamps: true, _id: false });
 
 export default mongoose.model("Room", roomSchema);

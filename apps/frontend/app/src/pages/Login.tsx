@@ -1,14 +1,13 @@
 import React, { useState } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
-import { authService } from "../features/auth/services/AuthService";
 import { useNavigate } from "react-router-dom";
 import { useUserStore } from "../store/UserStore";
 
 const Login: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
-  const { setToken, setUser } = useUserStore();
+  const { loginUser } = useUserStore();
 
   const formik = useFormik({
     initialValues: {
@@ -22,10 +21,7 @@ const Login: React.FC = () => {
     onSubmit: async (values) => {
       setError(null);
       try {
-        const { token, user } = await authService.login(values.email, values.password);
-        localStorage.setItem("token", token);
-        setToken(token);
-        setUser(user);
+        await loginUser({ email: values.email, password: values.password });
         navigate("/");
       } catch (err: any) {
         if (err?.response?.data?.message) {

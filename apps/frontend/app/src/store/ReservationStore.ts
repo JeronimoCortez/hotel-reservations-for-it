@@ -12,10 +12,11 @@ type ReservationState = {
 
   setToken: (token: string | null) => void;
   fetchReservations: (userId: string) => Promise<void>;
+  fetchAllReservations: () => Promise<void>;
   refreshReservations: () => Promise<void>;
   createReservation: (data: ICreateReservation) => Promise<Reservation | void>;
-  confirmReservation: (id: string) => Promise<Reservation | void>;
-  cancelReservation: (reservationId: string, requesterUserId: string) => Promise<void>;
+  confirmReservation: (id: string) => Promise<void>;
+  cancelReservation: (reservationId: string) => Promise<void>;
 };
 
 export const useReservationStore = create<ReservationState>((set, get) => ({
@@ -29,7 +30,8 @@ export const useReservationStore = create<ReservationState>((set, get) => ({
   fetchReservations: async (userId: string) => {
     set({ loading: true, error: null });
     try {
-      const token = get().token ?? undefined;
+      const token = get().token ?? localStorage.getItem("token");
+      if (!token) throw new Error("Auth token required to list reservations.");
       const res = await reservationService.listByUser(userId, token);
       set({ reservations: res, loading: false });
     } catch (err: any) {
@@ -40,8 +42,9 @@ export const useReservationStore = create<ReservationState>((set, get) => ({
   fetchAllReservations: async () => {
     set({ loading: true, error: null });
     try {
-      const token = get().token ?? undefined;
-      const res = await reservationService.listAll(token!);
+      const token = get().token ?? localStorage.getItem("token");
+      if (!token) throw new Error("Auth token required to list reservations.");
+      const res = await reservationService.listAll(token);
       set({ reservations: res, loading: false });
     } catch (err: any) {
       set({ error: err?.message ?? "Unknown error", loading: false });
@@ -49,18 +52,20 @@ export const useReservationStore = create<ReservationState>((set, get) => ({
   },
 
   refreshReservations: async () => {
-    return get().fetchReservations((get().reservations[0]?.user.id as string) || "");
+    const token = get().token ?? localStorage.getItem("token");
+    if (!token) return;
+    set({ token });
   },
 
   createReservation: async (data) => {
     set({ loading: true, error: null });
     try {
-      const token = localStorage.getItem("token")
+      const token = get().token ?? localStorage.getItem("token");
       if (!token) {
         Swal.fire({
           icon: "error",
           title: "Unauthorized",
-          text: "You must be logged in as admin to confirm a reservation.",
+          text: "You must be logged in to create a reservation.",
         });
         set({ loading: false });
         return;
@@ -76,51 +81,49 @@ export const useReservationStore = create<ReservationState>((set, get) => ({
   confirmReservation: async (id) => {
     set({ loading: true, error: null });
     try {
-      const token = localStorage.getItem("token");
+      const token = get().token ?? localStorage.getItem("token");
       if (!token) {
         Swal.fire({
           icon: "error",
           title: "Unauthorized",
-          text: "You must be logged in as admin to confirm a reservation.",
+          text: "You must be logged in to confirm a reservation.",
         });
         set({ loading: false });
         return;
       }
-      const updated = await reservationService.confirm(id, token);
+      const result = await reservationService.confirm(id, token);
       set((state) => ({
-        reservations: state.reservations.map((r) => (r.id === updated.id ? updated : r)),
+        reservations: state.reservations.map((r) =>
+          r.id === result.reservationId ? { ...r, status: result.status } : r
+        ),
         loading: false,
       }));
-      return updated;
     } catch (err: any) {
       set({ error: err?.message ?? "Failed to confirm reservation", loading: false });
     }
   },
 
-  cancelReservation: async (reservationId, requesterUserId) => {
+  cancelReservation: async (reservationId) => {
     set({ loading: true, error: null });
     try {
-      const token = localStorage.getItem("token");
+      const token = get().token ?? localStorage.getItem("token");
       if (!token) {
         Swal.fire({
           icon: "error",
           title: "Unauthorized",
-          text: "You must be logged in as admin to confirm a reservation.",
+          text: "You must be logged in to cancel a reservation.",
         });
         set({ loading: false });
         return;
       }
-      const res = await reservationService.cancel(reservationId, requesterUserId, token);
 
-      if (res) {
-        set((state) => ({
-          reservations: state.reservations.map((r) => (r.id === (res as Reservation).id ? (res as Reservation) : r)),
-          loading: false,
-        }));
-      } else {
-        set((state) => ({ reservations: state.reservations.filter((r) => r.id !== reservationId), loading: false }));
-      }
-      return;
+      const result = await reservationService.cancel(reservationId, token);
+      set((state) => ({
+        reservations: state.reservations.map((r) =>
+          r.id === result.reservationId ? { ...r, status: result.status } : r
+        ),
+        loading: false,
+      }));
     } catch (err: any) {
       set({ error: err?.message ?? "Failed to cancel reservation", loading: false });
     }

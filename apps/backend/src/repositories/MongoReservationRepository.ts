@@ -1,14 +1,20 @@
-import { Reservation } from "../../../../domain/src/entities/Reservation";
-import { Room } from "../../../../domain/src/entities/Room";
-import { User } from "../../../../domain/src/entities/User";
-import { Roles } from "../../../../domain/src/types/Roles";
-import { RoomType } from "../../../../domain/src/types/RoomType";
-import { Status } from "../../../../domain/src/types/Status";
-import { IReservationRepository } from "../../../../domain/src/use-cases/ports/IReservationRepository";
+import { Reservation } from "../../../../domain/dist/entities/Reservation";
+import { Room } from "../../../../domain/dist/entities/Room";
+import { User } from "../../../../domain/dist/entities/User";
+import { Roles } from "../../../../domain/dist/types/Roles";
+import { Status } from "../../../../domain/dist/types/Status";
+import { IReservationRepository } from "../../../../domain/dist/use-cases/ports/IReservationRepository";
+import { LocalDate } from "../../../../domain/dist/value-objects/LocalDate";
 import ReservationModel from "../models/ReservationModel";
 import RoomModel from "../models/RoomModel";
 import UserModel from "../models/UserModel";
 import { mapToRoomType } from "./MongoRoomRepository";
+
+function mapToStatus(raw?: string | null): Status {
+    if (raw === Status.CONFIRMED) return Status.CONFIRMED;
+    if (raw === Status.CANCELLED || raw === "CANDELLED") return Status.CANCELLED;
+    return Status.PENDING;
+}
 
 export class MongoReservationRepository implements IReservationRepository {
     async findById(id: string): Promise<Reservation | null> {
@@ -18,12 +24,12 @@ export class MongoReservationRepository implements IReservationRepository {
         const roomDoc = await RoomModel.findById(reservation.roomId).lean();
         if (!userDoc || !roomDoc) return null;
         const role = userDoc.role === Roles.ADMIN ? Roles.ADMIN : Roles.USER;
-        const user = new User(String(userDoc._id), userDoc.name ?? "", userDoc.email ?? "", userDoc.password ?? "", role);
-        const room = new Room(String(roomDoc._id), roomDoc.number ?? 0, mapToRoomType(roomDoc.type), roomDoc.price ?? 0, roomDoc.available ?? false);
-        return new Reservation(reservation._id!, user, room, new Date(reservation.startDate!), new Date(reservation.endDate!), reservation.status as any);
+        const user = new User(String(userDoc._id), userDoc.name ?? "", userDoc.email ?? "", "", role);
+        const room = new Room(String(roomDoc._id), roomDoc.number ?? 0, mapToRoomType(roomDoc.type), roomDoc.price ?? 0, roomDoc.inService ?? true);
+        return new Reservation(String(reservation._id), user, room, reservation.startDate as LocalDate, reservation.endDate as LocalDate, mapToStatus(reservation.status));
     }
 
-    async findByRoomAndRange(roomId: string, start: Date, end: Date): Promise<Reservation[]> {
+    async findByRoomAndRange(roomId: string, start: LocalDate, end: LocalDate): Promise<Reservation[]> {
         const reservations = await ReservationModel.find({
             roomId,
             $or: [
@@ -46,7 +52,7 @@ export class MongoReservationRepository implements IReservationRepository {
                         String(userDoc._id),
                         userDoc.name ?? "",
                         userDoc.email ?? "",
-                        userDoc.password ?? "",
+                        "",
                         userDoc.role === "ADMIN" ? Roles.ADMIN : Roles.USER
                     ),
                     new Room(
@@ -54,13 +60,11 @@ export class MongoReservationRepository implements IReservationRepository {
                         roomDoc.number ?? 0,
                         mapToRoomType(roomDoc.type),
                         roomDoc.price ?? 0,
-                        roomDoc.available ?? false
+                        roomDoc.inService ?? true
                     ),
-                    new Date(reservation.startDate!),
-                    new Date(reservation.endDate!),
-                    reservation.status === "CONFIRMED" ? Status.CONFIRMED :
-                        reservation.status === "CANCELLED" ? Status.CANCELLED :
-                            Status.PENDING
+                    reservation.startDate as LocalDate,
+                    reservation.endDate as LocalDate,
+                    mapToStatus(reservation.status)
                 )
             );
         }
@@ -82,7 +86,7 @@ export class MongoReservationRepository implements IReservationRepository {
             { upsert: true }
         )
     }
-    async findByRange(start: Date, end: Date): Promise<Reservation[]> {
+    async findByRange(start: LocalDate, end: LocalDate): Promise<Reservation[]> {
         const reservations = await ReservationModel.find({
             $or: [
                 { startDate: { $lt: end }, endDate: { $gt: start } }
@@ -97,9 +101,7 @@ export class MongoReservationRepository implements IReservationRepository {
 
             if (!userDoc || !roomDoc) continue; // saltar si no existe
 
-            const status = reservation.status === "CONFIRMED" ? Status.CONFIRMED :
-                reservation.status === "CANCELLED" ? Status.CANCELLED :
-                    Status.PENDING;
+            const status = mapToStatus(reservation.status);
 
             results.push(new Reservation(
                 String(reservation._id),
@@ -107,7 +109,7 @@ export class MongoReservationRepository implements IReservationRepository {
                     String(userDoc._id),
                     userDoc.name ?? "",
                     userDoc.email ?? "",
-                    userDoc.password ?? "",
+                    "",
                     userDoc.role === "ADMIN" ? Roles.ADMIN : Roles.USER
                 ),
                 new Room(
@@ -115,10 +117,10 @@ export class MongoReservationRepository implements IReservationRepository {
                     roomDoc.number ?? 0,
                     mapToRoomType(roomDoc.type),
                     roomDoc.price ?? 0,
-                    roomDoc.available ?? false
+                    roomDoc.inService ?? true
                 ),
-                new Date(reservation.startDate!),
-                new Date(reservation.endDate!),
+                reservation.startDate as LocalDate,
+                reservation.endDate as LocalDate,
                 status
             ));
         }
@@ -146,19 +148,19 @@ export class MongoReservationRepository implements IReservationRepository {
                         String(userDoc._id),
                         userDoc.name ?? "",
                         userDoc.email ?? "",
-                        userDoc.password ?? "",
+                        "",
                         userDoc.role as Roles
                     ),
                     new Room(
                         String(roomDoc._id),
                         roomDoc.number ?? 0,
-                        roomDoc.type as RoomType,
+                        mapToRoomType(roomDoc.type),
                         roomDoc.price ?? 0,
-                        roomDoc.available ?? false
+                        roomDoc.inService ?? true
                     ),
-                    new Date(r.startDate!),
-                    new Date(r.endDate!),
-                    r.status as Status
+                    r.startDate as LocalDate,
+                    r.endDate as LocalDate,
+                    mapToStatus(r.status)
                 )
             );
         }
@@ -182,19 +184,19 @@ export class MongoReservationRepository implements IReservationRepository {
                         String(userDoc._id),
                         userDoc.name ?? "",
                         userDoc.email ?? "",
-                        userDoc.password ?? "",
+                        "",
                         userDoc.role as Roles
                     ),
                     new Room(
                         String(roomDoc._id),
                         roomDoc.number ?? 0,
-                        roomDoc.type as RoomType,
+                        mapToRoomType(roomDoc.type),
                         roomDoc.price ?? 0,
-                        roomDoc.available ?? false
+                        roomDoc.inService ?? true
                     ),
-                    new Date(r.startDate!),
-                    new Date(r.endDate!),
-                    r.status as Status
+                    r.startDate as LocalDate,
+                    r.endDate as LocalDate,
+                    mapToStatus(r.status)
                 )
             );
         }
